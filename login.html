@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Health Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="card">
+    <h1>Login</h1>
+    <p class="subtitle">Sign in to your Health Tracker account.</p>
+
+    <form id="login-form">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="your@email.com" required>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="Enter your password" required>
+      </div>
+
+      <button type="submit" id="login-btn">Sign In</button>
+      <div id="error" class="error hidden"></div>
+    </form>
+
+    <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: #9ca3af;">
+      <p>Don't have an account? <a href="#" id="signup-link" style="color: #38bdf8; text-decoration: none;">Sign up</a></p>
+    </div>
+  </div>
+
+  <script src="router.js"></script>
+  <script>
+    // Login form handling will be added here
+    const form = document.getElementById('login-form');
+    const btn = document.getElementById('login-btn');
+    const errorBox = document.getElementById('error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.classList.add('hidden');
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      // Login logic will be implemented here
+      console.log('Login attempt:', { email, password });
+    });
+  </script>
+</body>
+</html>
+
