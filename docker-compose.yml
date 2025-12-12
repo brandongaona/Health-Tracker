@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # 1. The Database Service
   postgres:
     image: postgres:15-alpine
     container_name: healthtracker-db
@@ -18,6 +19,21 @@ services:
       timeout: 5s
       retries: 5
 
+  # 2. Your C++ App Service (The new part!)
+  server:
+    build: .                    # Build using the Dockerfile in this folder
+    container_name: healthtracker-app
+    ports:
+      - "8080:8080"             # Map Mac port 8080 -> Container port 8080
+    depends_on:
+      postgres:
+        condition: service_healthy # Wait until DB is actually ready before starting app
+    environment:
+      - DB_HOST=postgres        # The hostname is the service name "postgres"
+      - DB_PORT=5432
+      - DB_USER=healthuser
+      - DB_PASS=healthpass
+      - DB_NAME=healthtracker
+
 volumes:
   postgres_data:
-

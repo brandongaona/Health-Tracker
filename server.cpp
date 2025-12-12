@@ -1,5 +1,6 @@
-// server.cpp
 #include <iostream>
+#include <fstream>   // NEW: Needed to read html files
+#include <streambuf> // NEW: Needed to read html files
 
 // Disable strict Windows version check in cpp-httplib
 #define CPPHTTPLIB_NO_WIN32_WINNT_CHECK
@@ -8,8 +9,7 @@
 
 #include "httplib.h"
 #include "json.hpp"
-#include "planner.h"  // or whatever header declares UserInput + computePlan
-
+#include "planner.h"
 
 using json = nlohmann::json;
 using namespace std;
@@ -28,7 +28,6 @@ Activity parseActivity(const string& s) {
     if (s == "moderate")   return Activity::Moderate;
     if (s == "very")       return Activity::Very;
     if (s == "extra")      return Activity::Extra;
-    // default
     return Activity::Moderate;
 }
 
@@ -45,41 +44,45 @@ Pace parsePace(const string& s) {
 }
 
 // --- CORS helper ---
-
 void add_cors_headers(Response& res) {
     res.set_header("Access-Control-Allow-Origin", "*");
-    res.set_header("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.set_header("Access-Control-Allow-Methods", "POST, OPTIONS, GET");
     res.set_header("Access-Control-Allow-Headers", "Content-Type");
 }
 
 int main() {
     Server svr;
 
+    // --- 1. SERVE STATIC FILES (HTML/CSS) ---
+    
+    // Serve any file from the current directory (like styles.css, login.html)
+    svr.set_mount_point("/", "./");
+
+    // Explicitly handle the homepage ("/") to show index.html
+    svr.Get("/", [](const Request& req, Response& res) {
+        std::ifstream file("index.html");
+        if (file) {
+            std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            res.set_content(content, "text/html");
+        } else {
+            res.status = 404;
+            res.set_content("index.html not found", "text/plain");
+        }
+    });
+
+    // --- 2. API ENDPOINTS ---
+
     // Handle CORS preflight
     svr.Options(R"(.*)", [](const Request& req, Response& res) {
         add_cors_headers(res);
     });
 
-    // POST /plan : expects JSON body, returns JSON
     svr.Post("/plan", [](const Request& req, Response& res) {
         add_cors_headers(res);
-
         try {
             auto body = json::parse(req.body);
-
-            // Expecting something like:
-            // {
-            //   "sex": "male",
-            //   "age": 25,
-            //   "height_cm": 180,
-            //   "weight_kg": 75,
-            //   "activity": "moderate",
-            //   "goal": "cut",
-            //   "pace": "normal"
-            // }
-
             UserInput u;
-            u.units    = Units::Metric;  // we enforce metric API
+            u.units    = Units::Metric; 
             u.sex      = parseSex(body.at("sex").get<string>());
             u.ageYears = body.at("age").get<int>();
             u.height   = body.at("height_cm").get<double>();
@@ -113,6 +116,6 @@ int main() {
         }
     });
 
-    cout << "Listening on http://localhost:8080\n";
+    cout << "Listening on http://0.0.0.0:8080\n";
     svr.listen("0.0.0.0", 8080);
 }

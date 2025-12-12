@@ -1,104 +1,11 @@
+#include "planner.h" // Include the header so we know what UserInput/PlanResult are
 #include <iostream>
-#include <iomanip>
-#include <limits>
-#include <string>
 #include <cmath>
+#include <algorithm> // Needed for max()
 
 using namespace std;
 
-enum class Sex { Male, Female };
-enum class Units { Metric, Imperial };
-enum class Activity { Sedentary=1, Light=2, Moderate=3, Very=4, Extra=5 };
-enum class Goal { Cut, Maintain, Bulk };
-enum class Pace { Slow, Normal, Aggressive };
-
-struct UserInput {
-    Sex sex;
-    Units units;
-    int ageYears;
-    double height; // cm (internal)
-    double weight; // kg (internal)
-    Activity activity;
-    Goal goal;
-    Pace pace;
-};
-
-double getDouble(const string& prompt, double minVal, double maxVal) {
-    while (true) {
-        cout << prompt;
-        double x;
-        if (cin >> x && x >= minVal && x <= maxVal) return x;
-        cout << "Invalid input. Please enter a number in [" << minVal << ", " << maxVal << "].\n";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    }
-}
-
-int getInt(const string& prompt, int minVal, int maxVal) {
-    while (true) {
-        cout << prompt;
-        int x;
-        if (cin >> x && x >= minVal && x <= maxVal) return x;
-        cout << "Invalid input. Please enter an integer in [" << minVal << ", " << maxVal << "].\n";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    }
-}
-
-Sex getSex() {
-    while (true) {
-        cout << "Sex (1 = Male, 2 = Female): ";
-        int s;
-        if (cin >> s && (s == 1 || s == 2)) return s == 1 ? Sex::Male : Sex::Female;
-        cout << "Please enter 1 or 2.\n";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    }
-}
-
-Units getUnits() {
-    while (true) {
-        cout << "Units (1 = Metric kg/cm, 2 = Imperial lb/in): ";
-        int u;
-        if (cin >> u && (u == 1 || u == 2)) return u == 1 ? Units::Metric : Units::Imperial;
-        cout << "Please enter 1 or 2.\n";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    }
-}
-
-Activity getActivity() {
-    cout << "Activity level:\n"
-            " 1) Sedentary (little/no exercise)\n"
-            " 2) Lightly active (1-3 days/wk)\n"
-            " 3) Moderately active (3-5 days/wk)\n"
-            " 4) Very active (6-7 days/wk)\n"
-            " 5) Extra active (physical job + training)\n";
-    int a = getInt("Choose 1-5: ", 1, 5);
-    return static_cast<Activity>(a);
-}
-
-Goal getGoal() {
-    cout << "Goal:\n"
-            " 1) Cut (lose fat)\n"
-            " 2) Maintain\n"
-            " 3) Bulk (gain muscle)\n";
-    int g = getInt("Choose 1-3: ", 1, 3);
-    if (g == 1) return Goal::Cut;
-    if (g == 2) return Goal::Maintain;
-    return Goal::Bulk;
-}
-
-Pace getPace() {
-    cout << "Pace (weekly rate):\n"
-            " 1) Slow (~0.25% body weight / week)\n"
-            " 2) Normal (~0.5% body weight / week)\n"
-            " 3) Aggressive (~1.0% body weight / week)\n";
-    int p = getInt("Choose 1-3: ", 1, 3);
-    if (p == 1) return Pace::Slow;
-    if (p == 2) return Pace::Normal;
-    return Pace::Aggressive;
-}
+// --- Logic Helpers ---
 
 double activityFactor(Activity a) {
     switch (a) {
@@ -126,13 +33,6 @@ double paceFraction(Pace p) {
     }
 }
 
-struct MacroPlan {
-    double calories;
-    double protein_g;
-    double fat_g;
-    double carbs_g;
-};
-
 MacroPlan computeMacros(Goal goal, double weightKg, double calories,
                         double protein_g_per_kg = -1.0, double fat_pct = 0.25) {
     double ppk;
@@ -155,17 +55,7 @@ MacroPlan computeMacros(Goal goal, double weightKg, double calories,
     return { calories, protein_g, fat_g, carbs_g };
 }
 
-// -------- NEW: core result struct + pure computePlan --------
-
-struct PlanResult {
-    double bmr;
-    double tdee;
-    double targetCalories;
-    double weeklyChangeKg;
-    double weeklyChangeLb;
-    Pace   paceUsed;
-    MacroPlan macros;
-};
+// --- Main Calculation Function ---
 
 PlanResult computePlan(const UserInput& u) {
     PlanResult res;
