@@ -59,7 +59,17 @@ int main() {
     svr.set_mount_point("/", "./");
 
     // Explicitly handle the homepage ("/") to show index.html
-    svr.Get("/", [](const Request& req, Response& res) {
+    svr.Get("/", (req, res) => {
+        std::ifstream file("login.html");
+        if (file) {
+            std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            res.set_content(content, "text/html");
+        } else {
+            res.status = 404;
+            res.set_content("login.html not found", "text/plain");
+        }
+    });
+    svr.Get("/index", [](const Request& req, Response& res) {
         std::ifstream file("index.html");
         if (file) {
             std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -69,18 +79,9 @@ int main() {
             res.set_content("index.html not found", "text/plain");
         }
     });
-    svr.Get("/login", (req, res) => {
-        std::ifstream file("login.html");
-        if (file) {
-            std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-            res.set_content(content, "text/html");
-        } else {
-            res.status = 404;
-            res.set_content("login.html not found", "text/plain");
-        }
+    
 
     // --- 2. API ENDPOINTS ---
-
     // Handle CORS preflight
     svr.Options(R"(.*)", [](const Request& req, Response& res) {
         add_cors_headers(res);
