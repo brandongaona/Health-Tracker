@@ -59,7 +59,7 @@ int main() {
     svr.set_mount_point("/", "./");
 
     // Explicitly handle the homepage ("/") to show index.html
-    svr.Get("/", (req, res) => {
+    svr.Get("/", [](const Request& req, Response& res) {
         std::ifstream file("login.html");
         if (file) {
             std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
