@@ -69,6 +69,15 @@ int main() {
             res.set_content("index.html not found", "text/plain");
         }
     });
+    svr.Get("/login", (req, res) => {
+        std::ifstream file("login.html");
+        if (file) {
+            std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            res.set_content(content, "text/html");
+        } else {
+            res.status = 404;
+            res.set_content("login.html not found", "text/plain");
+        }
 
     // --- 2. API ENDPOINTS ---
 
