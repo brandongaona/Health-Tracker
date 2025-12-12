@@ -28,20 +28,20 @@
         <div class="field">
           <div class="height-header">
             <label for="height" id="height-label">Height (cm)</label>
-            <div class="unit-toggle-group">
-              <button type="button" class="height-unit-toggle active" data-unit="cm">cm</button>
-              <button type="button" class="height-unit-toggle" data-unit="in">in</button>
-            </div>
+            <select id="height-unit" class="unit-select">
+              <option value="cm" selected>cm</option>
+              <option value="in">in</option>
+            </select>
           </div>
           <input id="height" type="number" min="130" max="230" value="173" required>
         </div>
         <div class="field">
           <div class="weight-header">
             <label for="weight" id="weight-label">Weight (kg)</label>
-            <div class="unit-toggle-group">
-              <button type="button" class="unit-toggle active" data-unit="kg">kg</button>
-              <button type="button" class="unit-toggle" data-unit="lb">lb</button>
-            </div>
+            <select id="weight-unit" class="unit-select">
+              <option value="kg" selected>kg</option>
+              <option value="lb">lb</option>
+            </select>
           </div>
           <input id="weight" type="number" min="35" max="300" value="72" required>
         </div>
@@ -127,98 +127,80 @@
     const resultsBox = document.getElementById('results');
     const weightInput = document.getElementById('weight');
     const weightLabel = document.getElementById('weight-label');
-    const unitToggles = document.querySelectorAll('.unit-toggle');
+    const weightUnitSelect = document.getElementById('weight-unit');
     let currentUnit = 'kg';
 
     const heightInput = document.getElementById('height');
     const heightLabel = document.getElementById('height-label');
-    const heightUnitToggles = document.querySelectorAll('.height-unit-toggle');
+    const heightUnitSelect = document.getElementById('height-unit');
     let currentHeightUnit = 'cm';
 
     const API_URL = 'http://localhost:8080/plan';
 
-    // Unit toggle functionality
-    unitToggles.forEach(toggle => {
-      toggle.addEventListener('click', () => {
-        const newUnit = toggle.dataset.unit;
-        if (newUnit === currentUnit) return;
+    // Weight unit dropdown functionality
+    weightUnitSelect.addEventListener('change', () => {
+      const newUnit = weightUnitSelect.value;
+      if (newUnit === currentUnit) return;
 
-        const currentValue = parseFloat(weightInput.value);
-        if (isNaN(currentValue)) {
-          currentUnit = newUnit;
-          updateUnitDisplay();
-          return;
-        }
-
-        // Convert value
-        let newValue;
-        if (currentUnit === 'kg' && newUnit === 'lb') {
-          newValue = currentValue * 2.20462; // kg to lb
-          weightInput.min = '77';
-          weightInput.max = '661';
-        } else {
-          newValue = currentValue / 2.20462; // lb to kg
-          weightInput.min = '35';
-          weightInput.max = '300';
-        }
-
-        weightInput.value = Math.round(newValue * 10) / 10;
+      const currentValue = parseFloat(weightInput.value);
+      if (isNaN(currentValue)) {
         currentUnit = newUnit;
         updateUnitDisplay();
-      });
+        return;
+      }
+
+      // Convert value
+      let newValue;
+      if (currentUnit === 'kg' && newUnit === 'lb') {
+        newValue = currentValue * 2.20462; // kg to lb
+        weightInput.min = '77';
+        weightInput.max = '661';
+      } else {
+        newValue = currentValue / 2.20462; // lb to kg
+        weightInput.min = '35';
+        weightInput.max = '300';
+      }
+
+      weightInput.value = Math.round(newValue * 10) / 10;
+      currentUnit = newUnit;
+      updateUnitDisplay();
     });
 
     function updateUnitDisplay() {
       weightLabel.textContent = `Weight (${currentUnit})`;
-      unitToggles.forEach(toggle => {
-        if (toggle.dataset.unit === currentUnit) {
-          toggle.classList.add('active');
-        } else {
-          toggle.classList.remove('active');
-        }
-      });
     }
 
-    // Height unit toggle functionality
-    heightUnitToggles.forEach(toggle => {
-      toggle.addEventListener('click', () => {
-        const newUnit = toggle.dataset.unit;
-        if (newUnit === currentHeightUnit) return;
+    // Height unit dropdown functionality
+    heightUnitSelect.addEventListener('change', () => {
+      const newUnit = heightUnitSelect.value;
+      if (newUnit === currentHeightUnit) return;
 
-        const currentValue = parseFloat(heightInput.value);
-        if (isNaN(currentValue)) {
-          currentHeightUnit = newUnit;
-          updateHeightUnitDisplay();
-          return;
-        }
-
-        // Convert value
-        let newValue;
-        if (currentHeightUnit === 'cm' && newUnit === 'in') {
-          newValue = currentValue / 2.54; // cm to inches
-          heightInput.min = '51';
-          heightInput.max = '91';
-        } else {
-          newValue = currentValue * 2.54; // inches to cm
-          heightInput.min = '130';
-          heightInput.max = '230';
-        }
-
-        heightInput.value = Math.round(newValue * 10) / 10;
+      const currentValue = parseFloat(heightInput.value);
+      if (isNaN(currentValue)) {
         currentHeightUnit = newUnit;
         updateHeightUnitDisplay();
-      });
+        return;
+      }
+
+      // Convert value
+      let newValue;
+      if (currentHeightUnit === 'cm' && newUnit === 'in') {
+        newValue = currentValue / 2.54; // cm to inches
+        heightInput.min = '51';
+        heightInput.max = '91';
+      } else {
+        newValue = currentValue * 2.54; // inches to cm
+        heightInput.min = '130';
+        heightInput.max = '230';
+      }
+
+      heightInput.value = Math.round(newValue * 10) / 10;
+      currentHeightUnit = newUnit;
+      updateHeightUnitDisplay();
     });
 
     function updateHeightUnitDisplay() {
       heightLabel.textContent = `Height (${currentHeightUnit})`;
-      heightUnitToggles.forEach(toggle => {
-        if (toggle.dataset.unit === currentHeightUnit) {
-          toggle.classList.add('active');
-        } else {
-          toggle.classList.remove('active');
-        }
-      });
     }
 
     form.addEventListener('submit', async (e) => {
