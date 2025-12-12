@@ -124,7 +124,7 @@
       font-size: 0.8rem;
       color: #f97373;
     }
-    .weight-header {
+    .weight-header, .height-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -171,7 +171,13 @@
           <input id="age" type="number" min="14" max="100" value="20" required>
         </div>
         <div class="field">
-          <label for="height">Height (cm)</label>
+          <div class="height-header">
+            <label for="height" id="height-label">Height (cm)</label>
+            <div style="display: flex; gap: 0.25rem;">
+              <button type="button" class="height-unit-toggle active" data-unit="cm">cm</button>
+              <button type="button" class="height-unit-toggle" data-unit="in">in</button>
+            </div>
+          </div>
           <input id="height" type="number" min="130" max="230" value="173" required>
         </div>
         <div class="field">
@@ -269,6 +275,11 @@
     const unitToggles = document.querySelectorAll('.unit-toggle');
     let currentUnit = 'kg';
 
+    const heightInput = document.getElementById('height');
+    const heightLabel = document.getElementById('height-label');
+    const heightUnitToggles = document.querySelectorAll('.height-unit-toggle');
+    let currentHeightUnit = 'cm';
+
     const API_URL = 'http://localhost:8080/plan';
 
     // Unit toggle functionality
@@ -313,6 +324,48 @@
       });
     }
 
+    // Height unit toggle functionality
+    heightUnitToggles.forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const newUnit = toggle.dataset.unit;
+        if (newUnit === currentHeightUnit) return;
+
+        const currentValue = parseFloat(heightInput.value);
+        if (isNaN(currentValue)) {
+          currentHeightUnit = newUnit;
+          updateHeightUnitDisplay();
+          return;
+        }
+
+        // Convert value
+        let newValue;
+        if (currentHeightUnit === 'cm' && newUnit === 'in') {
+          newValue = currentValue / 2.54; // cm to inches
+          heightInput.min = '51';
+          heightInput.max = '91';
+        } else {
+          newValue = currentValue * 2.54; // inches to cm
+          heightInput.min = '130';
+          heightInput.max = '230';
+        }
+
+        heightInput.value = Math.round(newValue * 10) / 10;
+        currentHeightUnit = newUnit;
+        updateHeightUnitDisplay();
+      });
+    });
+
+    function updateHeightUnitDisplay() {
+      heightLabel.textContent = `Height (${currentHeightUnit})`;
+      heightUnitToggles.forEach(toggle => {
+        if (toggle.dataset.unit === currentHeightUnit) {
+          toggle.classList.add('active');
+        } else {
+          toggle.classList.remove('active');
+        }
+      });
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorBox.style.display = 'none';
@@ -320,11 +373,16 @@
 
       const sex = form.sex.value;
       const age = Number(document.getElementById('age').value);
-      const height_cm = Number(document.getElementById('height').value);
+      let height_cm = Number(document.getElementById('height').value);
       let weight_kg = Number(document.getElementById('weight').value);
       const activity = document.getElementById('activity').value;
       const goal = document.getElementById('goal').value;
       const pace = document.getElementById('pace').value;
+
+      // Convert to cm if currently in inches
+      if (currentHeightUnit === 'in') {
+        height_cm = height_cm * 2.54;
+      }
 
       // Convert to kg if currently in pounds
       if (currentUnit === 'lb') {
