@@ -1,0 +1,9 @@
+*.exe
+*.o
+*.obj
+healthtracker
+server
+node_modules
+.git
+.gitignore
+
