@@ -124,6 +124,31 @@
       font-size: 0.8rem;
       color: #f97373;
     }
+    .weight-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.35rem;
+    }
+    .unit-toggle {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #9ca3af;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .unit-toggle:hover {
+      background: #1f2937;
+      color: #e5e7eb;
+    }
+    .unit-toggle.active {
+      background: #38bdf8;
+      color: white;
+      border-color: #38bdf8;
+    }
   </style>
 </head>
 <body>
@@ -150,7 +175,13 @@
           <input id="height" type="number" min="130" max="230" value="173" required>
         </div>
         <div class="field">
-          <label for="weight">Weight (kg)</label>
+          <div class="weight-header">
+            <label for="weight" id="weight-label">Weight (kg)</label>
+            <div style="display: flex; gap: 0.25rem;">
+              <button type="button" class="unit-toggle active" data-unit="kg">kg</button>
+              <button type="button" class="unit-toggle" data-unit="lb">lb</button>
+            </div>
+          </div>
           <input id="weight" type="number" min="35" max="300" value="72" required>
         </div>
       </div>
@@ -233,8 +264,54 @@
     const btn = document.getElementById('submit-btn');
     const errorBox = document.getElementById('error');
     const resultsBox = document.getElementById('results');
+    const weightInput = document.getElementById('weight');
+    const weightLabel = document.getElementById('weight-label');
+    const unitToggles = document.querySelectorAll('.unit-toggle');
+    let currentUnit = 'kg';
 
     const API_URL = 'http://localhost:8080/plan';
+
+    // Unit toggle functionality
+    unitToggles.forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const newUnit = toggle.dataset.unit;
+        if (newUnit === currentUnit) return;
+
+        const currentValue = parseFloat(weightInput.value);
+        if (isNaN(currentValue)) {
+          currentUnit = newUnit;
+          updateUnitDisplay();
+          return;
+        }
+
+        // Convert value
+        let newValue;
+        if (currentUnit === 'kg' && newUnit === 'lb') {
+          newValue = currentValue * 2.20462; // kg to lb
+          weightInput.min = '77';
+          weightInput.max = '661';
+        } else {
+          newValue = currentValue / 2.20462; // lb to kg
+          weightInput.min = '35';
+          weightInput.max = '300';
+        }
+
+        weightInput.value = Math.round(newValue * 10) / 10;
+        currentUnit = newUnit;
+        updateUnitDisplay();
+      });
+    });
+
+    function updateUnitDisplay() {
+      weightLabel.textContent = `Weight (${currentUnit})`;
+      unitToggles.forEach(toggle => {
+        if (toggle.dataset.unit === currentUnit) {
+          toggle.classList.add('active');
+        } else {
+          toggle.classList.remove('active');
+        }
+      });
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -244,10 +321,15 @@
       const sex = form.sex.value;
       const age = Number(document.getElementById('age').value);
       const height_cm = Number(document.getElementById('height').value);
-      const weight_kg = Number(document.getElementById('weight').value);
+      let weight_kg = Number(document.getElementById('weight').value);
       const activity = document.getElementById('activity').value;
       const goal = document.getElementById('goal').value;
       const pace = document.getElementById('pace').value;
+
+      // Convert to kg if currently in pounds
+      if (currentUnit === 'lb') {
+        weight_kg = weight_kg / 2.20462;
+      }
 
       if (!age || !height_cm || !weight_kg) {
         errorBox.textContent = 'Please fill in all numeric fields.';
