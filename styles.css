@@ -1,0 +1,158 @@
+* { box-sizing: border-box; }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f172a;
+  color: #e5e7eb;
+}
+.card {
+  background: #020617;
+  border-radius: 1rem;
+  padding: 1.75rem 2rem;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+h1 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+p.subtitle {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+label {
+  font-size: 0.85rem;
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #e5e7eb;
+}
+.row {
+  display: flex;
+  gap: 0.75rem;
+}
+.field {
+  margin-bottom: 0.9rem;
+  width: 100%;
+}
+input, select {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.5rem;
+  border: 1px solid #1f2937;
+  background: #020617;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+}
+input:focus, select:focus {
+  outline: 2px solid #38bdf8;
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.radio-group {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  color: #9ca3af;
+}
+button {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #22c55e, #06b6d4);
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  margin-top: 0.3rem;
+}
+button:hover {
+  filter: brightness(1.08);
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.results {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.3);
+  font-size: 0.9rem;
+}
+.results h2 {
+  margin-top: 0;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+.results h2.margin-top {
+  margin-top: 1rem;
+}
+.margin-top {
+  margin-top: 1rem;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 1.2rem;
+}
+.label-sm {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+.value {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.error {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #f97373;
+}
+.weight-header, .height-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+.unit-toggle {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid #1f2937;
+  background: #020617;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.unit-toggle:hover {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+.unit-toggle.active {
+  background: #38bdf8;
+  color: white;
+  border-color: #38bdf8;
+}
+.unit-toggle-group {
+  display: flex;
+  gap: 0.25rem;
+}
+.hidden {
+  display: none;
+}
+
