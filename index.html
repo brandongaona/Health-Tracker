@@ -254,7 +254,7 @@
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || 'Server error');
+          throw new Error(errData.error || `Server error (${res.status})`);
         }
 
         const data = await res.json();
@@ -279,7 +279,11 @@
 
         resultsBox.classList.remove('hidden');
       } catch (err) {
-        errorBox.textContent = err.message;
+        let errorMsg = err.message;
+        if (err.name === 'TypeError' && err.message.includes('fetch')) {
+          errorMsg = 'Failed to connect to server. Make sure the server is running on http://localhost:8080';
+        }
+        errorBox.textContent = errorMsg;
         errorBox.classList.remove('hidden');
       } finally {
         btn.disabled = false;
