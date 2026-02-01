@@ -2,11 +2,6 @@
 #include <fstream>   // NEW: Needed to read html files
 #include <streambuf> // NEW: Needed to read html files
 
-// Disable strict Windows version check in cpp-httplib
-#define CPPHTTPLIB_NO_WIN32_WINNT_CHECK
-// Avoid using mmap / CreateFile2 on Windows
-#define CPPHTTPLIB_NO_MMAP
-
 #include "httplib.h"
 #include "json.hpp"
 #include "planner.h"
