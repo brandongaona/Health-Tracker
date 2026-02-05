@@ -117,6 +117,10 @@
           <div class="value" id="res-carbs"></div>
         </div>
       </div>
+      <div id="food-recommendations" style="display: none; margin-top: 30px;">
+        <h2>Recommended Foods for Your Goal</h2>
+        <div id="food-list"></div>
+      </div>
     </div>
   </div>
 
@@ -278,6 +282,42 @@
           `${data.macros.carbs_g.toFixed(0)} g`;
 
         resultsBox.classList.remove('hidden');
+
+        // Fetch food recommendations
+        fetch('http://localhost:8080/api/recommend-foods', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            goal: goal,
+            targetProtein: data.macros.protein_g,
+            targetCalories: data.targetCalories
+          })
+        })
+        .then(response => response.json())
+        .then(foodData => {
+          const foodList = document.getElementById('food-list');
+          const foodRec = document.getElementById('food-recommendations');
+          
+          foodList.innerHTML = '';
+          
+          foodData.foods.forEach(food => {
+            const foodDiv = document.createElement('div');
+            foodDiv.style.cssText = 'padding: 15px; margin: 10px 0; background: #f5f5f5; border-radius: 8px;';
+            foodDiv.innerHTML = `
+              <strong>${food.name}</strong><br>
+              <small>
+                Calories: ${food.calories.toFixed(0)} | 
+                Protein: ${food.protein_g.toFixed(1)}g | 
+                Carbs: ${food.carbs_g.toFixed(1)}g | 
+                Fat: ${food.fat_g.toFixed(1)}g
+              </small>
+            `;
+            foodList.appendChild(foodDiv);
+          });
+          
+          foodRec.style.display = 'block';
+        })
+        .catch(error => console.error('Food recommendation error:', error));
       } catch (err) {
         let errorMsg = err.message;
         if (err.name === 'TypeError' && err.message.includes('fetch')) {

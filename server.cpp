@@ -5,6 +5,7 @@
 #include "httplib.h"
 #include "json.hpp"
 #include "planner.h"
+#include "food_api.h"
 
 using json = nlohmann::json;
 using namespace std;
@@ -114,6 +115,40 @@ int main() {
 
             res.set_content(out.dump(), "application/json");
         } catch (const std::exception& e) {
+            res.status = 400;
+            json err;
+            err["error"] = string("Bad request: ") + e.what();
+            res.set_content(err.dump(), "application/json");
+        }
+    });
+
+    svr.Post("/api/recommend-foods", [](const Request& req, Response& res) {
+        add_cors_headers(res);
+        try {
+            auto body = json::parse(req.body);
+            string goal = body.at("goal").get<string>();
+            double targetProtein = body.at("targetProtein").get<double>();
+            double targetCalories = body.at("targetCalories").get<double>();
+            
+            FoodRecommendations recommendations = recommendFoods(goal, targetProtein, targetCalories);
+            
+            json out;
+            out["goal"] = recommendations.goal_type;
+            out["foods"] = json::array();
+            
+            for (const auto& food : recommendations.foods) {
+                json foodJson;
+                foodJson["id"] = food.fdcId;
+                foodJson["name"] = food.description;
+                foodJson["calories"] = food.calories;
+                foodJson["protein_g"] = food.protein_g;
+                foodJson["carbs_g"] = food.carbs_g;
+                foodJson["fat_g"] = food.fat_g;
+                out["foods"].push_back(foodJson);
+            }
+            
+            res.set_content(out.dump(), "application/json");
+        } catch (const exception& e) {
             res.status = 400;
             json err;
             err["error"] = string("Bad request: ") + e.what();
