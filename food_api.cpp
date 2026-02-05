@@ -3,11 +3,10 @@
 #include <curl/curl.h>
 #include <iostream>
 #include <sstream>
+#include "config.h"
 
 using json = nlohmann::json;
 using namespace std;
-
-const string USDA_API_KEY = "REPLACE_WITH_YOUR_API_KEY";
 
 // Callback function for cURL to write response data
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, string* userp) {
